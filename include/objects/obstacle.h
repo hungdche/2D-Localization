@@ -1,26 +1,25 @@
 #pragma once 
+
 #include <SDL.h>
 
 #include "objects/object.h"
 
-class Vehicle : public Object {
+class Obstacle : public Object {
 private:
     position _pos;
-    velocity _vel;
-    acceleration _accel = {0,0};
-    rotation _rot;
     dimension _dim;
+    bool isDragged = false;
     SDL_Texture * _texture;
+    position _prev_mouse;
 
 public:
-    Vehicle(position p, dimension d, SDL_Texture * texture);
-    ~Vehicle();
+    Obstacle(position p, dimension d, SDL_Texture * texture);
+    ~Obstacle();
 
     position getPos() { return _pos; };
-    rotation getRot() { return {0}; };
     dimension getDim() { return _dim; };
     SDL_Texture * getTexture() { return _texture; };
 
     void handleEvent(SDL_Event & e);
-    void move();
+    void drag();
 };

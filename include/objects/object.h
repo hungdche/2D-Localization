@@ -6,12 +6,9 @@
 
 class Object {
 public:
-    virtual position getPosition() { return {0,0}; };
-    virtual rotation getRotation() { return {0}; }
-    virtual dimension getDimension() { return {10, 10}; };
+    virtual position getPos() { return {0,0}; };
+    virtual dimension getDim() { return {10, 10}; };
     virtual SDL_Texture * getTexture() { return NULL; };
-    void printAttribute() {
-        printf("POS: %d %d ROT: %f DIM: %d %d\n", getPosition().x, getPosition().y, getRotation().angle, getDimension().w, getDimension().h);
-    };
+    virtual void handleEvent(SDL_Event & e) = 0;
     virtual ~Object() {}
 };
