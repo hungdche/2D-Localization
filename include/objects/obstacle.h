@@ -16,8 +16,8 @@ public:
     Obstacle(position p, dimension d, SDL_Texture * texture);
     ~Obstacle();
 
-    position getPos() { return _pos; };
-    dimension getDim() { return _dim; };
+    position & getPos() { return _pos; };
+    const dimension getDim() { return _dim; };
     SDL_Texture * getTexture() { return _texture; };
 
     void handleEvent(SDL_Event & e);

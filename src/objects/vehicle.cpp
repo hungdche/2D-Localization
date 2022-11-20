@@ -14,6 +14,8 @@ void Vehicle::handleEvent (SDL_Event & e) {
             case SDLK_DOWN: _vel.y += 0.7; break;
             case SDLK_LEFT: _vel.x -= 0.7; break;
             case SDLK_RIGHT: _vel.x += 0.7; break;
+            case SDLK_a: _deg_offset -= 1; break;
+            case SDLK_d: _deg_offset += 1; break;
         }
     } else if( e.type == SDL_KEYUP && e.key.repeat == 0 ){
         switch( e.key.keysym.sym ) {
@@ -21,6 +23,8 @@ void Vehicle::handleEvent (SDL_Event & e) {
             case SDLK_DOWN: _vel.y -= 0.7; break;
             case SDLK_LEFT: _vel.x += 0.7; break;
             case SDLK_RIGHT: _vel.x -= 0.7; break;
+            case SDLK_a: _deg_offset += 1; break;
+            case SDLK_d: _deg_offset -= 1; break;
         }
     }
 }
@@ -33,4 +37,8 @@ void Vehicle::move () {
     _pos.y += _vel.y;
     if (_pos.y < 0 || _pos.y + _dim.h > ScreenDim.h) 
         _pos.y -= _vel.y;
+
+    _rot += _deg_offset;
 }
+
+
