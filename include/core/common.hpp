@@ -3,9 +3,11 @@
 #include <math.h>
 #include <iostream>
 #include <SDL.h>
+#include <vector>
 
 // structs
 struct position { float x; float y; };
+struct line { position s; position e;};
 struct velocity { float x; float y; };
 struct acceleration { float x; float y; };
 typedef float angle;

@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "core/common.hpp"
+#include "core/physics.hpp"
 
 class Object {
 public:

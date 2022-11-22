@@ -4,10 +4,7 @@
 #include "SDL.h"
 #include <cmath>
 
-#include "core/common.hpp"
 #include "core/engine.h"
-#include "objects/obstacle.h"
-#include "objects/vehicle.h"
 
 
 #define SCREEN_WIDTH   1280
@@ -17,7 +14,7 @@
 dimension ScreenDim;
 int main(int argc, char** argv) {
     ScreenDim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    Engine mainEngine("Simulator", ScreenDim);
+    Engine mainEngine("Simulator");
 
     // const var
     const float frame_period = (1.0f / SCREEN_FPS) * 1000.0f; 

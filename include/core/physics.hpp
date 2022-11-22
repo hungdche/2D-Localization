@@ -5,6 +5,29 @@
 
 #include "core/common.hpp"
 
+inline float distance(position a, position b) {
+    return std::sqrt(std::pow((a.x - b.x), 2) + std::pow((a.y - b.y), 2));
+}
+
+inline position line_intersect (position a1, position a2, position b1, position b2) {
+    float den = (a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x);
+    if (den == 0) return {-1,-1};
+    float num_y = (a1.x*a2.y - a1.y*a2.x)*(b1.y-b2.y) - (b1.x*b2.y - b1.y*b2.x)*(a1.y-a2.y);
+    float num_x = (a1.x*a2.y - a1.y*a2.x)*(b1.x-b2.x) - (b1.x*b2.y - b1.y*b2.x)*(a1.x-a2.x);
+
+    position intersect = {num_x / den, num_y / den};
+    if (intersect.x > ScreenDim.w || intersect.x < 0) intersect.x = -1;
+    if (intersect.y > ScreenDim.h || intersect.y < 0) intersect.y = -1;
+    return intersect;
+}
+
+inline position rayEndpoint(position a, angle theta, float distance) {
+    theta = theta * M_PI / 180.0;
+    float x_offset = distance * std::sin(theta);
+    float y_offset = -distance * std::cos(theta);
+    position endpt = {a.x + x_offset, a.y + y_offset};
+    return endpt;
+}
 
 /* implementation taken from https://web.archive.org/web/20160418004148/http://freespace.virgin.net/hugo.elias/models/m_perlin.htm */
 class PerlinNoise {
@@ -63,9 +86,4 @@ public:
         }
         return total;
     }
-};
-
-class AWGN {
-private:
-public:
 };

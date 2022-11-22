@@ -14,6 +14,7 @@ include_directories(
 set(HEADERS
     include/core/common.hpp
     include/core/physics.hpp
+    include/sensors/ray.hpp
     include/objects/object.h
     include/objects/vehicle.h
     include/objects/obstacle.h
