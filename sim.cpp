@@ -3,39 +3,49 @@
 #include <string>
 #include "SDL.h"
 #include <cmath>
-
+#include <memory>
+#ifdef USE_EMSDK
+#include <emscripten.h>
+#endif
 #include "core/engine.h"
 
 
-#define SCREEN_WIDTH   1280
-#define SCREEN_HEIGHT  720 
+#define SCREEN_WIDTH   854
+#define SCREEN_HEIGHT  480 
 #define SCREEN_FPS     120.0
 
 dimension ScreenDim;
-int main(int argc, char** argv) {
-    ScreenDim = {SCREEN_WIDTH, SCREEN_HEIGHT};
-    Engine mainEngine("Simulator");
+std::unique_ptr<Engine> mainEngine;
+static bool is_running = true;
 
-    // const var
-    const float frame_period = (1.0f / SCREEN_FPS) * 1000.0f; 
-    const SDL_Color GREEN = {};
-
-    bool is_running = true;
+void main_loop() {
     SDL_Event event;
-    Uint8* keyboard;
+    while (SDL_PollEvent(&event) != 0) {
+        if (event.type == SDL_QUIT) {is_running = false;}
+        mainEngine->handleEvent(event);
+    }
+    mainEngine->run();
+}
 
 
-    bool isDown = false;
+int main(int argc, char** argv) {
+    if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_EVENTS)) {
+        std::cout << SDL_GetError() << std::endl;
+        exit(0);
+    }
+
+    ScreenDim = {SCREEN_WIDTH, SCREEN_HEIGHT};
+    mainEngine = std::unique_ptr<Engine>(new Engine("Simulator"));
+
+#ifdef USE_EMSDK
+    emscripten_set_main_loop(main_loop, 0, 1);
+#else
+    const float frame_period = (1.0f / SCREEN_FPS) * 1000.0f; 
     // main loop
     while (is_running) {
         Uint64 t_frame_start = SDL_GetPerformanceCounter();
-        while (SDL_PollEvent(&event) != 0) {
-            if (event.type == SDL_QUIT) {is_running = false;}
-            mainEngine.handleEvent(event);
-        }
-
-        // main logic
-        mainEngine.run();
+        
+        main_loop();
 
         // cap fps
         Uint64 t_frame_end = SDL_GetPerformanceCounter();
@@ -43,7 +53,7 @@ int main(int argc, char** argv) {
         if (std::floor(frame_period - t_elapsed) >= 0)
             SDL_Delay(std::floor(frame_period - t_elapsed));
     }
-
+#endif
     // deallocate
     SDL_Quit();
 }

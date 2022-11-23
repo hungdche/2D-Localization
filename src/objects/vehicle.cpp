@@ -1,9 +1,9 @@
 #include <objects/vehicle.h>
 
 Vehicle::Vehicle(position p, dimension d, SDL_Texture * texture) 
-    : _pos{p} , _rot{0}, _dim{d}, _texture{texture} { 
+    : _pos{p} , _rot{0}, _dim{d}, _texture{texture}, _forward_offset(0), _deg_offset(0) { 
 
-    for (float i = -20; i <= 20; i+=0.5) {
+    for (float i = -20; i <= 20; i+=1) {
         position center = getCenter();
         rays.push_back(new Ray(center, i));
     }

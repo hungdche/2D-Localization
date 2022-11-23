@@ -6,10 +6,7 @@
 #include "core/engine.h"
 
 Engine::Engine(const char * name) {
-    if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_EVENTS)) {
-        std::cout << SDL_GetError() << std::endl;
-        exit(0);
-    }
+    // SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
     _window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ScreenDim.w, ScreenDim.h, 0);
     _renderer = SDL_CreateRenderer(_window, -1,  SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     _background = drawGrid(ScreenDim, &SOFT_BLACK, &DARK_GREY, 40);
@@ -85,7 +82,7 @@ void Engine::GenerateObstacle() {
 
 Vehicle * Engine::GenerateCar (dimension d) {
     SDL_Texture * carTexture = createTexture(d, &SOFT_WHITE);
-    Vehicle * car = new Vehicle({100, 100}, d, carTexture);
+    Vehicle * car = new Vehicle({static_cast<float>(ScreenDim.w/2), static_cast<float>(ScreenDim.h/2)}, d, carTexture);
     return car;
 }
 
@@ -152,7 +149,7 @@ void Engine::renderCar () {
     SDL_SetRenderDrawColor(_renderer, SOFT_WHITE.r, SOFT_WHITE.g, SOFT_WHITE.b, SOFT_WHITE.a);
     std::vector<Ray*> rays = car->getRays();
     for (auto & ray : rays) {
-        position intersect; position temp; 
+        position intersect = {100,100}; position temp; 
         float smallest = 10000.0f;
 
         for (auto & ob : obstacles) {

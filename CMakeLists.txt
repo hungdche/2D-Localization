@@ -1,8 +1,17 @@
 
 cmake_minimum_required(VERSION 3.10)
+
 project(simulator)
 
-find_package(SDL2 2.0.22 REQUIRED)
+option(USE_EMSDK "Using Emscripten" OFF)
+
+if(USE_EMSDK)
+    set(CMAKE_CXX_FLAGS "-s USE_SDL=2")
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    add_definitions(-DUSE_EMSDK)
+endif(USE_EMSDK)
+
+find_package(SDL2 REQUIRED)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}
@@ -15,6 +24,7 @@ set(HEADERS
     include/core/common.hpp
     include/core/physics.hpp
     include/sensors/ray.hpp
+    include/sensors/lidar.h
     include/objects/object.h
     include/objects/vehicle.h
     include/objects/obstacle.h
@@ -22,6 +32,7 @@ set(HEADERS
 )
 
 set(SOURCES
+    src/sensors/lidar.cpp
     src/objects/vehicle.cpp
     src/objects/obstacle.cpp
     src/core/engine.cpp
@@ -35,3 +46,14 @@ target_link_libraries( ${PROJECT_NAME}
     SOURCES_LIB
     ${SDL2_LIBRARIES}
 )
+
+if(USE_EMSDK)
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS 
+        "-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap'] --bind" 
+        "-s MALLOC=emmalloc" 
+        "-s WASM_BIGINT=1" 
+        "-s USE_SDL=2" 
+        "-s ALLOW_MEMORY_GROWTH=1")
+endif(USE_EMSDK)
+
+

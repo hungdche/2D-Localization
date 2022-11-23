@@ -34,6 +34,7 @@ private:
     void renderCar();
 
 public:
+    Engine();
     Engine(const char * name);
     ~Engine();
 
