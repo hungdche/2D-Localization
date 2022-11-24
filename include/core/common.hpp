@@ -4,14 +4,18 @@
 #include <iostream>
 #include <SDL.h>
 #include <vector>
+#include <memory>
 
-// structs
+// state
 struct position { float x; float y; };
-struct line { position s; position e;};
-struct velocity { float x; float y; };
-struct acceleration { float x; float y; };
+enum is_accelerate {non, positive, negative, deccelerate};
+typedef float velocity;
+typedef float acceleration;
 typedef float angle;
+
+// geometry
 struct dimension { int w; int h; };
+struct line { position s; position e;};
 
 // global variable 
 extern dimension ScreenDim;

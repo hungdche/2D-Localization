@@ -24,7 +24,7 @@ set(HEADERS
     include/core/common.hpp
     include/core/physics.hpp
     include/sensors/ray.hpp
-    include/sensors/lidar.h
+    include/sensors/sensors.h
     include/objects/object.h
     include/objects/vehicle.h
     include/objects/obstacle.h
@@ -32,7 +32,7 @@ set(HEADERS
 )
 
 set(SOURCES
-    src/sensors/lidar.cpp
+    src/sensors/sensors.cpp
     src/objects/vehicle.cpp
     src/objects/obstacle.cpp
     src/core/engine.cpp

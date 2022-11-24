@@ -33,3 +33,7 @@
 
 # build folder 
 build/
+build_temp/
+
+# html files
+sim.html 
