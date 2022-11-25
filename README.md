@@ -1,27 +1,49 @@
-# 2D Localization Simulator
+# 2D Localization
 
-This is an interactive simulation to visualize 2D Simulation using SDL graphic library.  
+This is an interactive simulation to visualize 2D Simulation using SDL graphic library. Online version is available here: 
 
-### Prerequisites
+This was developed mainly as a way for me to wrap my head around different techiniques in robotic localization, and what is more beginner-friendly that starting things off in 2D? 
 
-1. SDL2 Version at least 2.0.20
-2. Emscripten (Optional)
+## Features
 
-### Installation 
+In this simulation, a vehicle (square) is equipped with a camera and a raydar (ray-dar). Both are infused with random white noise as an attempt to replicate real-world sensor noise, and the task is to localize the cube. 
 
-1. clone the repo 
+The basic movements are:
 
-        $ git clone 
-        $ mkdir build ; cd build 
+* `Left, Right arrow`: steer
+* `Up button` to accelerate in the positive direction 
+* `Down button` to accelerate in the negative direction 
+* `Space` to brake
+* `Enter` to randomly spawn obstacles of random sizes, can be drag around  
 
-1. Normal build 
+## Prerequisites
 
+1. CMake
+2. SDL2 Version at least 2.0.20
+3. Emscripten (Optional)
+
+## Installation 
+
+#### 1. clone the repo 
+
+        $ git clone https://github.com/hungdche/Localization-Simulation.git
+
+#### 2. Normal build 
+
+        $ cd 
+        $ mkdir build && cd build 
         $ cmake .. 
         $ make 
         $ ./simulator
 
-2. WebAssembly 
+#### 3. Running it on the web
+
+Make 
 
         $ emcmake -DUSE_EMSDK=ON ..
         $ emmake make
-        $ emrun simulator.html
+        $ emrun ../simulator.html
+
+## Resources
+
+### On basic gemo
