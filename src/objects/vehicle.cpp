@@ -4,8 +4,8 @@ Vehicle::Vehicle(position p, dimension d, SDL_Texture * texture)
     : _pos{p} , _rot{0}, _dim{d}, _texture{texture}, _accel{0}, _deg_offset(0) { 
 
     lastFrameTs = SDL_GetTicks(); // in ms
-    _camera = std::shared_ptr<Camera>(new Camera(getCenter(), _rot, 40));
-    _raydar = std::shared_ptr<RayDar>(new RayDar(getCenter()));
+    _camera = std::unique_ptr<Camera>(new Camera(getCenter(), _rot, 20));
+    _raydar = std::unique_ptr<RayDar>(new RayDar(getCenter()));
 }
 
 Vehicle::~Vehicle() { 
@@ -53,8 +53,7 @@ void Vehicle::move () {
         _vel = std::fmin (_vel, max_speed);
         _vel = std::fmax (_vel, -max_speed);
     }
-    
-    printf("%f %f\n", _vel, _accel);
+
     off_set = _vel * dt;
     float velx = _vel * getX(getAngle()); 
     float vely = _vel * getY(getAngle());
@@ -73,4 +72,7 @@ void Vehicle::move () {
     _raydar->updateState(getCenter());
 }
 
+state Vehicle::dumpState() {
+    
+}
 

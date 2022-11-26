@@ -11,7 +11,8 @@ Engine::Engine(const char * name) {
     onResizeCanvas();
     _renderer = SDL_CreateRenderer(_window, -1,  SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     _background = drawGrid(ScreenDim, &SOFT_BLACK, &DARK_GREY, 40);
-    car = GenerateCar({20, 20});
+    car = std::unique_ptr<Vehicle>(GenerateCar({20, 20}));
+    scar = std::unique_ptr<SimCar>(GenerateSimCar());
 }
 
 Engine::~Engine() {
@@ -32,11 +33,6 @@ SDL_Texture * Engine::drawGrid (dimension d, const SDL_Color * bc, const SDL_Col
     SDL_SetRenderDrawColor(_renderer, gc->r, gc->g, gc->b, gc->a); 
     for (int i = 0; i < d.w; i+=size) SDL_RenderDrawLine(_renderer, i, 0, i, d.h); // verticle
     for (int i = 0; i < d.h; i+=size) SDL_RenderDrawLine(_renderer, 0, i, d.w, i); // horizontal
-    
-    // border
-    SDL_SetRenderDrawColor(_renderer, SOFT_WHITE.r, SOFT_WHITE.g, SOFT_WHITE.b, SOFT_WHITE.a); 
-    SDL_Rect border = {0, 0, d.w, d.h};
-    SDL_RenderDrawRect(_renderer, &border);
 
     SDL_SetRenderTarget(_renderer, NULL);
     return grid;
@@ -71,8 +67,8 @@ void Engine::GenerateObstacle() {
     int height = (rand() % 20 + 10) * 10; height = std::fmin(height, ScreenDim.w - y_cell);
 
     SDL_Texture * obstacleTexture = createTexture({width, height}, &DARK_GREY, &SOFT_WHITE);
-    Obstacle * ob = new Obstacle({x_cell, y_cell}, {width, height}, obstacleTexture);
-    obstacles.push_back(ob);
+    std::unique_ptr<Obstacle> ob = std::unique_ptr<Obstacle>(new Obstacle({x_cell, y_cell}, {width, height}, obstacleTexture));
+    obstacles.push_back(std::move(ob));
 }
 
 Vehicle * Engine::GenerateCar (dimension d) {
@@ -81,13 +77,21 @@ Vehicle * Engine::GenerateCar (dimension d) {
     return car;
 }
 
+SimCar * Engine::GenerateSimCar () {
+    SDL_Texture * carTexture = createTexture(car->getDim(), &NEON_BLUE, &DARK_GREY);
+    SimCar * scar = new SimCar(car->getPos(), car->getDim(), carTexture);
+    return scar;
+}
+
 void Engine::run() {
     onResizeCanvas();
     SDL_RenderClear(_renderer);
     SDL_RenderCopy(_renderer, _background, NULL, NULL);
 
-    for (auto ob : obstacles) render(ob);
+    if (!sim_view)
+        for (auto & ob : obstacles) render(ob.get());
     renderCar();
+    render(scar.get());
 
     SDL_RenderPresent(_renderer);
 }
@@ -121,10 +125,12 @@ void Engine::render(Object * obj, SDL_Texture * texture) {
 void Engine::handleEvent (SDL_Event & e) {
     if( e.type == SDL_KEYDOWN && e.key.repeat == 0 ) {
         switch( e.key.keysym.sym ) {
-            case 13: GenerateObstacle();
+            case 13: GenerateObstacle(); break;
+            case SDLK_l: sim_view = !sim_view;
         }
     }
-    for (auto& ob : obstacles) {ob->handleEvent(e);ob->drag();}
+    if (!sim_view)
+        for (auto& ob : obstacles) {ob->handleEvent(e);ob->drag();}
     car->handleEvent(e); 
 }
 
@@ -147,47 +153,13 @@ void Engine::renderCar () {
         }
     }
     car->move();
+    state s = {car->getPos(), car->getAngle(), SDL_GetTicks()};
+    scar->updateState(s);
 
     // draw raydar rays
     SDL_SetRenderDrawColor(_renderer, 0, SOFT_WHITE.g, 0, 10);
     std::vector<Ray*> rayDars = car->getRayDar()->rays;
     for (auto & ray : rayDars) {
-        position intersect = ray->getDir(); position temp; 
-        float smallest = 10000.0f;
-
-        for (auto & ob : obstacles) {
-            std::vector<line> lines = ob->getWalls();
-            for (line l : lines) {
-                if (!ray->isIntersecting(l,temp)) continue;
-                if (distance(temp, ray->_origin) < smallest) {
-                    smallest = distance(temp, ray->_origin);
-                    intersect = temp;
-                }
-            }
-        }
-
-        for (line l : walls) {
-            if (!ray->isIntersecting(l,temp)) continue;
-            if (distance(temp, ray->_origin) < smallest) {
-                smallest = distance(temp, ray->_origin);
-                intersect = temp;
-            }
-        }
-
-        position rayep;
-        for (float radius = 15; radius < distance(intersect, ray->_origin); radius *= 1.35) {
-            rayep = rayEndpoint(ray->_origin, ray->_rot, radius);
-            SDL_RenderDrawPointF(_renderer, rayep.x, rayep.y);
-        }
-
-        SDL_FRect rect = {intersect.x - 1.5, intersect.y - 1.5, 3, 3};
-        SDL_RenderFillRectF(_renderer, &rect);
-    }
-
-    // draw camera rays
-    SDL_SetRenderDrawColor(_renderer, SOFT_WHITE.r, SOFT_WHITE.g, SOFT_WHITE.b, SOFT_WHITE.a);
-    std::vector<Ray*> camRays = car->getCamera()->rays;
-    for (auto & ray : camRays) {
         position intersect = {-1,-1}; position temp; 
         float smallest = 10000.0f;
 
@@ -209,10 +181,63 @@ void Engine::renderCar () {
                 intersect = temp;
             }
         }
-        SDL_RenderDrawLineF(_renderer, ray->_origin.x,ray->_origin.y, intersect.x, intersect.y);
+
+        if (!sim_view) { 
+            if (intersect.x == -1) intersect = ray->getDir();
+            position rayep;
+            for (float radius = 15; radius < distance(intersect, ray->_origin); radius *= 2) {
+                rayep = rayEndpoint(ray->_origin, ray->_rot, radius);
+                SDL_RenderDrawPointF(_renderer, rayep.x, rayep.y);
+            }
+        } else {
+            if (intersect.x != -1) {
+                position rayep;
+                for (float radius = 15; radius < distance(intersect, ray->_origin); radius *= 2) {
+                    rayep = rayEndpoint(ray->_origin, ray->_rot, radius);
+                    SDL_RenderDrawPointF(_renderer, rayep.x, rayep.y);
+                }
+            }
+        }
+        if (intersect.x != -1) {
+            
+            SDL_FRect rect = {intersect.x - 1.5, intersect.y - 1.5, 3, 3};
+            SDL_RenderFillRectF(_renderer, &rect);
+        } 
     }
 
-    render(car);
+    // draw camera rays
+    SDL_SetRenderDrawColor(_renderer, SOFT_WHITE.r, SOFT_WHITE.g, SOFT_WHITE.b, SOFT_WHITE.a);
+    std::vector<Ray*> camRays = car->getCamera()->rays;
+    for (int i = 0; i < camRays.size(); i++) {
+        position intersect = {-1,-1}; position temp; 
+        float smallest = 10000.0f;
+
+        for (auto & ob : obstacles) {
+            std::vector<line> lines = ob->getWalls();
+            for (line l : lines) {
+                if (!camRays[i]->isIntersecting(l,temp)) continue;
+                if (distance(temp, camRays[i]->_origin) < smallest) {
+                    smallest = distance(temp, camRays[i]->_origin);
+                    intersect = temp;
+                }
+            }
+        }
+
+        for (line l : walls) {
+            if (!camRays[i]->isIntersecting(l,temp)) continue;
+            if (distance(temp, camRays[i]->_origin) < smallest) {
+                smallest = distance(temp, camRays[i]->_origin);
+                intersect = temp;
+            }
+        }
+        SDL_FRect rect = {intersect.x - 2.5, intersect.y - 2.5, 5, 5};
+        SDL_RenderFillRectF(_renderer, &rect);
+
+        if ((i == 0 || i == camRays.size() - 1) && !sim_view)
+            SDL_RenderDrawLineF(_renderer, camRays[i]->_origin.x,camRays[i]->_origin.y, intersect.x, intersect.y);
+    }
+
+    render(car.get());
     car->setLastUpdate(SDL_GetTicks());
 }
 

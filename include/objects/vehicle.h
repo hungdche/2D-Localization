@@ -5,6 +5,13 @@
 #include "sensors/sensors.h"
 #include "objects/object.h"
 
+struct state {
+    // state
+    position _pos;
+    angle _yaw;
+    Uint32 timestamp;
+    // 
+};
 
 class Vehicle : public Object {
 private:
@@ -43,6 +50,7 @@ public:
     // setters
     void setLastUpdate (Uint32 l) { lastFrameTs = l; };
     void setMaxSpeed (float v) { max_speed = v; };
+    state dumpState();
     
     // event actions
     void handleEvent(SDL_Event & e);

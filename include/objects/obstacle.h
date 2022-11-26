@@ -6,9 +6,15 @@
 
 class Obstacle : public Object {
 private:
-    position _pos; dimension _dim;
-    bool isDragged = false; position _prev_mouse;
+    // state
+    position _pos; 
+    dimension _dim;
 
+    // mouse movement
+    bool isDragged = false; 
+    position _prev_mouse;
+
+    // visual 
     SDL_Texture * _texture;
     
 

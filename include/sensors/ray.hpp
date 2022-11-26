@@ -9,6 +9,7 @@
 struct Ray {
     position _origin;
     angle _rot;
+    float _noise;
     bool _is_segment;
 
     Ray(position o, angle r, bool i) : _origin(o),  _rot(r), _is_segment(i) { }

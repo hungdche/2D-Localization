@@ -3,7 +3,7 @@
 Camera::Camera (position center, float centralAngle, float fov) {
     float start = centralAngle - fov / 2;
     float end = centralAngle + fov / 2;
-    for (float i = start; i <= end; i+=1) {
+    for (float i = start; i <= end; i+=0.2) {
         rays.push_back(new Ray(center, i, false));
     }
 }
