@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "objects/vehicle.h"
+#include <random>
 
 class SimCar : public Object{
 private:
@@ -11,6 +12,7 @@ private:
 
     // visual
     SDL_Texture * _texture;
+    Uint32 lastTime;
 
 public:
     SimCar(position init_pos, dimension dim, SDL_Texture * texture);

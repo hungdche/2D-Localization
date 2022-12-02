@@ -1,16 +1,26 @@
 #include "objects/simcar.h"
 
 SimCar::SimCar(position init_pos, dimension dim, SDL_Texture * texture) 
-    : _pos{init_pos}, _rot{0}, _dim{dim}, _texture{texture} { }
+    : _pos{init_pos}, _rot{0}, _dim{dim}, _texture{texture}, lastTime(0) {
+        std::cout << "Hi";
+     }
 
 SimCar::~SimCar() {
     SDL_DestroyTexture(_texture);
 }
 
 void SimCar::updateState(state s) {
-    srand(time(NULL));
+    std::random_device rd; 
+    std::mt19937 gen(rd()); 
+    std::normal_distribution<float> dist(0.0, 0.03); 
 
-    _pos.x = s._pos.x + rand() % 300;
-    _pos.y = s._pos.y + rand() % 300;
-    _rot = s._yaw + rand() % 30;
+    float dt = (s.timestamp - lastTime) / 1000.0f;
+    
+    _pos.x += s._vel * getX(_rot) * dt;
+    _pos.y += s._vel * getY(_rot) * dt;
+    _rot += s._yaw * dt + dist(gen);
+
+    lastTime = s.timestamp;
 }
+
+

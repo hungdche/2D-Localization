@@ -7,7 +7,14 @@
 #include <memory>
 
 // state
-struct position { float x; float y; };
+struct position { 
+    float x; 
+    float y;
+    bool operator==(const position & other) { 
+        return (x == other.x && y == other.y);
+    };
+};
+
 enum is_accelerate {non, positive, negative, deccelerate};
 typedef float velocity;
 typedef float acceleration;
@@ -24,5 +31,6 @@ extern dimension ScreenDim;
 const SDL_Color SOFT_BLACK = {24, 26, 24, 255};
 const SDL_Color DARK_GREY = {35, 35, 35, 255};
 const SDL_Color SOFT_WHITE = {100, 100, 100, 255};
-const SDL_Color DARK_BLUE = {4, 16, 49, 255};
-const SDL_Color NEON_BLUE = {27, 253, 241, 20};
+const SDL_Color DARK_BLUE = {23, 48, 67, 255};
+const SDL_Color LIGHT_BLUE = {118, 194, 227, 255};
+const SDL_Color NEON_BLUE = {12, 141, 255, 255};

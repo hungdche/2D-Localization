@@ -7,7 +7,7 @@
 
 struct state {
     // state
-    position _pos;
+    velocity _vel;
     angle _yaw;
     Uint32 timestamp;
     // 
@@ -38,10 +38,12 @@ public:
 
     // getters
     position & getPos() { return _pos; };
+    velocity & getVel() { return _vel; };
     position getCenter() { return {_pos.x + (_dim.w / 2), _pos.y + (_dim.h / 2)}; }; 
     const float getOffset() { return off_set;};
     const angle getAngle() { return _rot; };
     const dimension getDim() { return _dim; };
+    const Uint32 getLastTs() { return lastFrameTs; };
 
     SDL_Texture * getTexture() { return _texture; };
     std::shared_ptr<Camera> getCamera() {return _camera; };
@@ -50,10 +52,11 @@ public:
     // setters
     void setLastUpdate (Uint32 l) { lastFrameTs = l; };
     void setMaxSpeed (float v) { max_speed = v; };
+    void setAngle (angle a) { _rot = a; };
     state dumpState();
     
     // event actions
     void handleEvent(SDL_Event & e);
-    void move();
+    void move(Uint32 current_time);
     void bump();
 };

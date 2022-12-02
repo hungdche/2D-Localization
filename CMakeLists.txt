@@ -5,6 +5,7 @@ project(simulator)
 
 option(USE_EMSDK "Using Emscripten" OFF)
 
+set (CMAKE_CXX_STANDARD 17)
 if(USE_EMSDK)
     set(CMAKE_CXX_FLAGS "-s USE_SDL=2")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
@@ -12,19 +13,20 @@ if(USE_EMSDK)
 endif(USE_EMSDK)
 
 find_package(SDL2 REQUIRED)
-find_package(Eigen3 REQUIRED)
+# find_package(Eigen3 REQUIRED)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/include
     ${SDL2_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIRS}
+    # ${EIGEN3_INCLUDE_DIRS}
 )
 
 set(HEADERS
     include/core/common.hpp
     include/core/physics.hpp
+    include/core/algorithm.hpp
     include/sensors/noise.hpp
     include/sensors/ray.hpp
     include/sensors/sensors.h
@@ -43,14 +45,11 @@ set(SOURCES
     src/core/engine.cpp
 )
 
-add_library(SOURCES_LIB SHARED ${HEADERS} ${SOURCES})
-
-add_executable(${PROJECT_NAME} sim.cpp)
+add_executable(${PROJECT_NAME} sim.cpp ${HEADERS} ${SOURCES})
 
 target_link_libraries( ${PROJECT_NAME}
-    SOURCES_LIB
     ${SDL2_LIBRARIES}
-    ${EIGEN3_LIBRARIES}
+    # ${EIGEN3_LIBRARIES}
 )
 
 if(USE_EMSDK)

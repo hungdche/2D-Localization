@@ -32,8 +32,8 @@ void Vehicle::handleEvent (SDL_Event & e) {
     }
 }
 
-void Vehicle::move () {
-    float dt = (SDL_GetTicks() - lastFrameTs) / 1000.0f;
+void Vehicle::move (Uint32 current_time) {
+    float dt = (current_time - lastFrameTs) / 1000.0f;
     if (is_accel) {
         switch (is_accel) {
             case positive: 
@@ -58,21 +58,20 @@ void Vehicle::move () {
     float velx = _vel * getX(getAngle()); 
     float vely = _vel * getY(getAngle());
     // move in x direction
-    _pos.x += velx * dt;
-    if (_pos.x < 0 || _pos.x + _dim.w > ScreenDim.w)
-        _pos.x -= velx * dt;
+    if (_pos.x+velx * dt >= 0 && _pos.x +velx * dt+ _dim.w < ScreenDim.w && _pos.y + vely * dt >= 0 && _pos.y+vely * dt + _dim.h < ScreenDim.h) {
+        _pos.x += velx * dt;
+        _pos.y += vely * dt;
+    } else {
+        _vel = -_vel/10;
+    }
 
     // move in y direction
-    _pos.y += vely * dt;
-    if (_pos.y < 0 || _pos.y + _dim.h > ScreenDim.h)
-        _pos.y -= vely * dt;
+    // _pos.y += vely * dt;
+        
 
-    _rot =  std::fmod((_rot + _deg_offset * dt), 360);
+    _rot =  std::fmod((_rot + _deg_offset * dt) + 180, 360);
+    if (_rot < 0) _rot += 360;
+    _rot -= 180;
     _camera->updateState(getCenter(), _deg_offset* dt);
     _raydar->updateState(getCenter());
 }
-
-state Vehicle::dumpState() {
-    
-}
-
