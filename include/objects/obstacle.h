@@ -1,7 +1,5 @@
 #pragma once 
 
-#include <SDL.h>
-
 #include "objects/object.h"
 
 class Obstacle : public Object {

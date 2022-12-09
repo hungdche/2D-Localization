@@ -1,7 +1,7 @@
 #include <objects/vehicle.h>
 
 Vehicle::Vehicle(position p, dimension d, SDL_Texture * texture) 
-    : _pos{p} , _rot{0}, _dim{d}, _texture{texture}, _accel{0}, _deg_offset(0) { 
+    : _pos{p} , _vel{0}, _rot{0}, _dim{d}, _texture{texture}, _accel{0}, _deg_offset(0) { 
 
     lastFrameTs = SDL_GetTicks(); // in ms
     _camera = std::unique_ptr<Camera>(new Camera(getCenter(), _rot, 20));
@@ -39,17 +39,20 @@ void Vehicle::move (Uint32 current_time) {
             case positive: 
                 if (_vel > 0) _accel = 75;
                 else _accel = 125;
+                _vel += _accel * dt;
                 break;
             case negative:
                 if (_vel > 0) _accel = -125;
                 else _accel = -75;
+                _vel += _accel * dt;
                 break;
             case deccelerate:
-                if (_vel > 0) _accel = -300;
-                else _accel = 300;
+                if (_vel > 0)
+                    _vel = std::fmax(_vel - 300 * dt, 0);
+                else if (_vel < 0) 
+                    _vel = std::fmin(_vel + 300 * dt, 0);
                 break;
         }
-        _vel += _accel * dt;
         _vel = std::fmin (_vel, max_speed);
         _vel = std::fmax (_vel, -max_speed);
     }

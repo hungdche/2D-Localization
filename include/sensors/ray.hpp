@@ -1,6 +1,5 @@
 #pragma once 
 
-#include <SDL.h>
 #include <vector>
 
 #include "core/physics.hpp"

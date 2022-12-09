@@ -1,17 +1,9 @@
 #pragma once 
-#include <SDL.h>
 #include <vector>
 
 #include "sensors/sensors.h"
 #include "objects/object.h"
 
-struct state {
-    // state
-    velocity _vel;
-    angle _yaw;
-    Uint32 timestamp;
-    // 
-};
 
 class Vehicle : public Object {
 private:

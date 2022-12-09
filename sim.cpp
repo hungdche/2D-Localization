@@ -1,14 +1,11 @@
 // include c++ libs
 #include <iostream>
 #include <string>
-#include "SDL.h"
 #include <cmath>
 #include <memory>
-#ifdef USE_EMSDK
-#include <emscripten.h>
-#endif
 
 #include "core/engine.h"
+#include "core/common.hpp"
 
 #define SCREEN_FPS 120.0
 
@@ -28,15 +25,10 @@ void main_loop() {
 }
 
 int main(int argc, char** argv) {
-    if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_EVENTS)) {
-        std::cout << SDL_GetError() << std::endl;
-        exit(0);
-    }
-
-    // ScreenDim = {SCREEN_WIDTH, SCREEN_HEIGHT};
+    
     mainEngine = std::unique_ptr<Engine>(new Engine("Simulator"));
 
-#ifdef USE_EMSDK
+#ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(main_loop, SCREEN_FPS, 1);
 #else
     const float frame_period = (1.0f / SCREEN_FPS) * 1000.0f; 
@@ -56,5 +48,5 @@ int main(int argc, char** argv) {
 #endif
 
     // deallocate
-    SDL_Quit();
+    
 }

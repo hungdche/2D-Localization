@@ -2,6 +2,23 @@
 
 #include "sensors/ray.hpp"
 
+struct control {
+    velocity _vel;
+    angle _yaw;
+    Uint32 timestamp;
+};
+
+struct state {
+    position _pos;
+    angle _rot;
+};
+
+struct PtdCld {
+    float distance;
+    angle degree;
+    Uint32 timestamp;
+};
+
 struct Camera {
     std::vector<Ray *> rays;
     Camera (position center, float centralAngle, float fov);

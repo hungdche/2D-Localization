@@ -1,24 +1,38 @@
 #include <iostream>
 #include <string>
-#include <SDL.h>
 #include <cmath>
 
 #include "core/engine.h"
 dimension ScreenDim;
 
 Engine::Engine(const char *name) {
+    if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_EVENTS)) {
+        std::cout << SDL_GetError() << std::endl;
+        exit(0);
+    }
+    if (TTF_Init() < 0) {
+        std::cout << TTF_GetError() << std::endl;
+        exit(0);
+    }
     _window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_RESIZABLE);
     onResizeCanvas();
     _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     _background = drawGrid(ScreenDim, &SOFT_BLACK, &DARK_GREY, 40);
+    _font = TTF_OpenFont("../build/UbuntuMono-R.ttf", 17);
+    
     car = std::unique_ptr<Vehicle>(GenerateCar({20, 20}));
     scar = std::unique_ptr<SimCar>(GenerateSimCar());
+    _stat_surface = updateStats();
+    lastUpdate = SDL_GetTicks();
 }
 
 Engine::~Engine() {
+    TTF_CloseFont(_font);
     SDL_DestroyTexture(_background);
     SDL_DestroyRenderer(_renderer);
     SDL_DestroyWindow(_window);
+    TTF_Quit();
+    SDL_Quit();
 }
 
 SDL_Texture *Engine::drawGrid(dimension d, const SDL_Color *bc, const SDL_Color *gc, int size) {
@@ -83,20 +97,44 @@ Vehicle *Engine::GenerateCar(dimension d) {
 
 SimCar *Engine::GenerateSimCar() {
     SDL_Texture *carTexture = createTexture(car->getDim(), &LIGHT_BLUE, &NEON_BLUE);
-    SimCar *scar = new SimCar({static_cast<float>(ScreenDim.w / 2), static_cast<float>(ScreenDim.h / 2)}, car->getDim(), carTexture);
+    SimCar *scar = new SimCar(car->getPos(), car->getAngle(), car->getDim(), carTexture);
     return scar;
 }
 
 void Engine::run() {
+    // refresh the canvas
+    onResizeCanvas();
+    SDL_RenderClear(_renderer);
+    SDL_RenderCopy(_renderer, _background, NULL, NULL);
+    
+    renderObstacles();
     renderCar();
+    if (car->getLastTs() - lastUpdate > 100) {
+        lastUpdate = car->getLastTs();
+        SDL_FreeSurface(_stat_surface);
+        _stat_surface = updateStats();
+    }
+
+    // render stats
+    SDL_Texture * _stat_texture = SDL_CreateTextureFromSurface(_renderer, _stat_surface);
+    SDL_Rect dest;
+    dest.x = 10;
+    dest.y = ScreenDim.h - (_stat_surface->h) - 10;
+    dest.w = _stat_surface->w;
+    dest.h = _stat_surface->h;
+
+    SDL_RenderCopy(_renderer, _stat_texture, NULL, &dest);
+    SDL_DestroyTexture(_stat_texture);
+    // display
+    SDL_RenderPresent(_renderer);
 }
 
 void Engine::onResizeCanvas() {
     SDL_GetWindowSize(_window, &ScreenDim.w, &ScreenDim.h);
     position upleft = {0, 0};
-    position upright = {(float)ScreenDim.w, 0};
-    position downleft = {0, (float)ScreenDim.h};
-    position downright = {(float)ScreenDim.w, (float)ScreenDim.h};
+    position upright = {(float)ScreenDim.w-1, 0};
+    position downleft = {0, (float)ScreenDim.h-1};
+    position downright = {(float)ScreenDim.w-1, (float)ScreenDim.h-1};
     line up = {upleft, upright};
     line down = {downleft, downright};
     line right = {upright, downright};
@@ -130,8 +168,12 @@ void Engine::handleEvent(SDL_Event &e)
         case 13:
             GenerateObstacle();
             break;
+        case SDLK_n:
+            scar = std::unique_ptr<SimCar>(GenerateSimCar());
+            break;
         case SDLK_l:
             sim_view = !sim_view;
+            break;
         }
     }
     if (!sim_view)
@@ -142,16 +184,39 @@ void Engine::handleEvent(SDL_Event &e)
     car->handleEvent(e);
 }
 
-void Engine::renderCar() {
-    // refresh the canvas
-    onResizeCanvas();
-    SDL_RenderClear(_renderer);
-    SDL_RenderCopy(_renderer, _background, NULL, NULL);
+SDL_Surface * Engine::updateStats() {
+    std::string current = "Real " + std::to_string(car->getPos().x);
+    current += " " + std::to_string(car->getPos().y);
+    current += " " + std::to_string(car->getAngle() * M_PI / 180);
+    current += "\nEst. " + std::to_string(scar->getPos().x);
+    current += " " + std::to_string(scar->getPos().y);
+    current += " " + std::to_string(scar->getAngle() * M_PI / 180);
+    SDL_Surface* text_surf = TTF_RenderText_Blended_Wrapped(_font, current.c_str(), WHITE, 400);
+    if (!_font) std::cout << TTF_GetError();
+    if (!text_surf) std::cout << "NULL" << std::endl;
+    return text_surf;
+    // if (_stat_texture) SDL_DestroyTexture(_stat_texture);
+    // _stat_texture = SDL_CreateTextureFromSurface(_renderer, text_surf);
 
+    // SDL_Rect dest;
+    // dest.x = 10;
+    // dest.y = ScreenDim.h - (text_surf->h) - 10;
+    // dest.w = text_surf->w;
+    // dest.h = text_surf->h;
+    // SDL_RenderCopy(_renderer, _stat_texture, NULL, &dest);
+    // SDL_FreeSurface(text_surf);
+    // SDL_SetRenderDrawColor(_renderer, 225,225,225,255);
+    // SDL_RenderDrawRect(_renderer, &dest);
+}
+
+void Engine::renderObstacles() {
     // draw obstacles
     if (!sim_view)
         for (auto &ob : obstacles)
             render(ob.get());
+}
+
+void Engine::renderCar() {
 
     // handle car movement
     position prev_pos = car->getPos();
@@ -185,10 +250,10 @@ void Engine::renderCar() {
 
     velocity vel = isInDir(prev_pos, post_pos, prev_ang) * distance(post_pos, prev_pos) / dt;
     angle yaw = (post_ang - prev_ang) / dt;
-    state s = {vel, yaw, pos_t};
+    control s = {vel, yaw, pos_t};
 
     // update simcar and car
-    scar->updateState(s);
+    scar->feedIMU(s);
     car->setLastUpdate(pos_t);
 
     // draw raydar rays
@@ -282,8 +347,7 @@ void Engine::renderCar() {
     // draw car
     render(car.get());
     // if (sim_view)
-        render(scar.get());
+    render(scar.get());
 
-    // display
-    SDL_RenderPresent(_renderer);
+    
 }

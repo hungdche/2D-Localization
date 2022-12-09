@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <string>
-#include <SDL.h>
 #include <time.h>     
 #include <cmath>
 #include <vector>
@@ -21,6 +20,8 @@ private:
     SDL_Renderer * _renderer;
     SDL_Texture * _background;
     SDL_Texture * _grid;
+    SDL_Surface * _stat_surface;
+    TTF_Font * _font;
     bool sim_view = false;
     
     // objects
@@ -28,6 +29,9 @@ private:
     std::unique_ptr<SimCar> scar;
     std::vector<std::unique_ptr<Obstacle>> obstacles; 
     std::vector<line> walls;
+
+    // time
+    Uint16 lastUpdate;
     
 public:
     Engine(const char * name);
@@ -47,5 +51,7 @@ private:
     // time-based events
     void render(Object * obj, SDL_Texture * texture = NULL);
     void renderCar();
+    void renderObstacles();
+    SDL_Surface * updateStats();
     void onResizeCanvas();
 };
