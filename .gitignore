@@ -37,3 +37,6 @@ build_temp/
 
 # html files
 sim.html 
+
+# VSCODe
+.vscode
