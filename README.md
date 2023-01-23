@@ -1,8 +1,12 @@
 # 2D Localization
 
-This is an interactive simulation to visualize 2D Simulation using SDL graphic library. Online version is available here: 
+This is an interactive simulation to visualize 2D Simulation using SDL graphic library. I have also compiled this project into WebAssembly and put it up on GIthub, which is available here
 
 This was developed mainly as a way for me to wrap my head around different techiniques in robotic localization, and what is more beginner-friendly that starting things off in 2D? 
+
+<p align="center">
+  <img src="screenshots/sim.png" />
+</p>
 
 ## Features
 
@@ -10,7 +14,7 @@ In this simulation, a vehicle (square) is equipped with a camera and a raydar (r
 
 The basic movements are:
 
-* `Left, Right arrow`: steer
+* `Left, Right button`: steer
 * `Up button` to accelerate in the positive direction 
 * `Down button` to accelerate in the negative direction 
 * `Space` to brake
@@ -24,26 +28,10 @@ The basic movements are:
 
 ## Installation 
 
-#### 1. clone the repo 
 
-        $ git clone https://github.com/hungdche/Localization-Simulation.git
+        git clone https://github.com/hungdche/Localization-Simulation.git
+        cd 
+        mkdir build && cd build 
+        cmake .. 
+        make -j
 
-#### 2. Normal build 
-
-        $ cd 
-        $ mkdir build && cd build 
-        $ cmake .. 
-        $ make 
-        $ ./simulator
-
-#### 3. Running it on the web
-
-Make 
-
-        $ emcmake -DUSE_EMSDK=ON ..
-        $ emmake make
-        $ emrun ../simulator.html
-
-## Resources
-
-### On basic gemo
