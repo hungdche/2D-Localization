@@ -1,8 +1,9 @@
 # 2D Localization
 
-This is an interactive simulation to visualize 2D Simulation using SDL graphic library. I have also compiled this project into WebAssembly and put it up on GIthub, which is available here
+This is an interactive simulation to visualize 2D Simulation using SDL graphic library. This project was developed mainly as a way for me to wrap my head around different techiniques in robotic localization, and what is more beginner-friendly that starting things off in 2D? 
 
-This was developed mainly as a way for me to wrap my head around different techiniques in robotic localization, and what is more beginner-friendly that starting things off in 2D? 
+I have also compiled this project into WebAssembly and deployed it on Github, which is available here: [hungdche.github.io/2D-Localization](https://hungdche.github.io/2D-Localization/)
+
 
 <p align="center">
   <img src="screenshots/sim.png" />
@@ -10,13 +11,17 @@ This was developed mainly as a way for me to wrap my head around different techi
 
 ## Features
 
-In this simulation, a vehicle (square) is equipped with a camera and a raydar (ray-dar). Both are infused with random white noise as an attempt to replicate real-world sensor noise, and the task is to localize the cube. 
+In this simulation, a vehicle <span style="color:grey">(grey square)</span>. is equipped with a camera and a raydar (ray-dar). Both are infused with additive Gaussian noise as an attempt to replicate real-world sensor noise. 
+
+The task is to use various methods, such as Kalman Filter and its derivative, to try and localize the vehicle. THe <span style="color:cyan">cyan square</span> indicated the estimated pose (x,y,theta) of the vehicle. 
 
 The basic movements are:
 
-* `Left, Right button`: steer
+* `Left, Right button`: steer left/right
 * `Up button` to accelerate in the positive direction 
 * `Down button` to accelerate in the negative direction 
+* `n` to reset the predicted pose
+* `l` to switch between editting mode and simulating mode
 * `Space` to brake
 * `Enter` to randomly spawn obstacles of random sizes, can be drag around  
 
@@ -30,8 +35,8 @@ The basic movements are:
 
 
         git clone https://github.com/hungdche/Localization-Simulation.git
-        cd 
+        cd 2D-Localization
         mkdir build && cd build 
-        cmake .. 
+        cmake ..
         make -j
 
