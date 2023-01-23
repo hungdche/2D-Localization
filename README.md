@@ -5,8 +5,8 @@ This is an interactive simulation to visualize 2D Simulation using SDL graphic l
 I have also compiled this project into WebAssembly and deployed it on Github, which is available here: [hungdche.github.io/2D-Localization](https://hungdche.github.io/2D-Localization/)
 
 
-<p align="center">
-  <img src="screenshots/sim.png" />
+<p>
+  <img style="width: 100%;" src="screenshots/sim.png" />
 </p>
 
 ## Features
@@ -27,9 +27,7 @@ The basic movements are:
 
 ## Prerequisites
 
-1. CMake
-2. SDL2 Version at least 2.0.20
-3. Emscripten (Optional)
+Make sure to have installed SDL2 Version at least 2.0.20. Visit https://wiki.libsdl.org/SDL2/Installation for installation instruction. It is recommded that you install from source instead of `libsdl2-dev` from `apt`, since SDL version on apt is 2.0.10.
 
 ## Installation 
 
