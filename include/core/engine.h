@@ -21,6 +21,8 @@ private:
     SDL_Texture * _background;
     SDL_Texture * _grid;
     SDL_Surface * _stat_surface;
+    SDL_Surface * _speed_surface;
+    SDL_Surface * _options_surface;
     TTF_Font * _font;
     bool sim_view = false;
     
@@ -53,5 +55,7 @@ private:
     void renderCar();
     void renderObstacles();
     SDL_Surface * updateStats();
+    SDL_Surface * showSpeed();
+    SDL_Surface * showOptions();
     void onResizeCanvas();
 };

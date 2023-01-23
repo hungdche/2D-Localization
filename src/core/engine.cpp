@@ -23,6 +23,7 @@ Engine::Engine(const char *name) {
     car = std::unique_ptr<Vehicle>(GenerateCar({20, 20}));
     scar = std::unique_ptr<SimCar>(GenerateSimCar());
     _stat_surface = updateStats();
+    _speed_surface = showSpeed();
     lastUpdate = SDL_GetTicks();
 }
 
@@ -113,6 +114,8 @@ void Engine::run() {
         lastUpdate = car->getLastTs();
         SDL_FreeSurface(_stat_surface);
         _stat_surface = updateStats();
+        SDL_FreeSurface(_speed_surface);
+        _speed_surface = showSpeed();
     }
 
     // render stats
@@ -125,6 +128,15 @@ void Engine::run() {
 
     SDL_RenderCopy(_renderer, _stat_texture, NULL, &dest);
     SDL_DestroyTexture(_stat_texture);
+
+    SDL_Texture * _speed_texture = SDL_CreateTextureFromSurface(_renderer, _speed_surface);
+    dest.x = 10;
+    dest.y = 10;
+    dest.w = _speed_surface->w;
+    dest.h = _speed_surface->h;
+
+    SDL_RenderCopy(_renderer, _speed_texture, NULL, &dest);
+    SDL_DestroyTexture(_speed_texture);
     // display
     SDL_RenderPresent(_renderer);
 }
@@ -185,28 +197,32 @@ void Engine::handleEvent(SDL_Event &e)
 }
 
 SDL_Surface * Engine::updateStats() {
+    // current stat
     std::string current = "Real " + std::to_string(car->getPos().x);
     current += " " + std::to_string(car->getPos().y);
     current += " " + std::to_string(car->getAngle() * M_PI / 180);
+
+    // estimated stat
     current += "\nEst. " + std::to_string(scar->getPos().x);
     current += " " + std::to_string(scar->getPos().y);
     current += " " + std::to_string(scar->getAngle() * M_PI / 180);
+
+
     SDL_Surface* text_surf = TTF_RenderText_Blended_Wrapped(_font, current.c_str(), WHITE, 400);
     if (!_font) std::cout << TTF_GetError();
     if (!text_surf) std::cout << "NULL" << std::endl;
     return text_surf;
-    // if (_stat_texture) SDL_DestroyTexture(_stat_texture);
-    // _stat_texture = SDL_CreateTextureFromSurface(_renderer, text_surf);
+}
 
-    // SDL_Rect dest;
-    // dest.x = 10;
-    // dest.y = ScreenDim.h - (text_surf->h) - 10;
-    // dest.w = text_surf->w;
-    // dest.h = text_surf->h;
-    // SDL_RenderCopy(_renderer, _stat_texture, NULL, &dest);
-    // SDL_FreeSurface(text_surf);
-    // SDL_SetRenderDrawColor(_renderer, 225,225,225,255);
-    // SDL_RenderDrawRect(_renderer, &dest);
+SDL_Surface * Engine::showSpeed() {
+    // current stat
+    std::string current = "Speed " + std::to_string(car->getVel());
+    current += " Accel: " + std::to_string(car->getOffset());
+
+    SDL_Surface* text_surf = TTF_RenderText_Blended_Wrapped(_font, current.c_str(), WHITE, 400);
+    if (!_font) std::cout << TTF_GetError();
+    if (!text_surf) std::cout << "NULL" << std::endl;
+    return text_surf;
 }
 
 void Engine::renderObstacles() {
