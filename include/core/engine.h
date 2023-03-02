@@ -51,11 +51,15 @@ private:
     SimCar * GenerateSimCar();
     
     // time-based events
-    void render(Object * obj, SDL_Texture * texture = NULL);
-    void renderCar();
-    void renderObstacles();
     SDL_Surface * updateStats();
     SDL_Surface * showSpeed();
     SDL_Surface * showOptions();
     void onResizeCanvas();
+
+    // rendering
+    void render(Object * obj, SDL_Texture * texture = NULL);
+    void renderCar();
+    void renderObstacles();
+    void drawRaydars();
+    void drawCamRays();
 };

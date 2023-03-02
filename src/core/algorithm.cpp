@@ -1,51 +1,84 @@
 #include "core/algorithm.h"
 
-EKF::EKF(position pos, angle a, velocity lin, velocity ang) : Algorithm(pos, a){
-    // initialize shit here
+EKF::EKF(state s) {
+    x << s._pos.x, s._pos.y, s._rot;
+    F = Eigen::Matrix3f::Identity();
+    P = Eigen::Matrix3f::Identity();
+    H = Eigen::Matrix3f::Identity();
+    Q = Eigen::Matrix3f::Identity() ;
+    R = Eigen::Matrix3f::Identity() ;
+    u << 0 , 0;
 }
 
 EKF::~EKF() { }
 
-void EKF::feedPose(control data) {
-    Eigen::Vector2f u(data._vel, data._yaw);
-    
+state EKF::predict(control c) {
+    std::random_device rd; 
+    std::mt19937 gen(rd()); 
+    std::normal_distribution<float> dist(0.0, 0.5); 
+    std::normal_distribution<float> dist2(0.0, 0.005); 
+
     /* PREDICTION */
-    Eigen::Vector3f x_hat = F * x + B * u;
+    u[0] = c._vel * c.dt; u[1] = c._yaw * c.dt;
+    Eigen::Matrix<float,3,2> B;
+    B << getX(x[2]), 0, getY(x[2]), 0, 0, 1;
     
+    Eigen::Vector3f n;
+    n << dist(gen), dist(gen), dist2(gen);
+    x_hat = F * x + B * u + n;
+    P_hat = F * P * F.transpose() + Q;
+    
+    return {{x_hat[0], x_hat[1]}, x_hat[2]};
 }
 
+void EKF::update(state s) {
+    /* MEASUREMENT */
+    Eigen::Vector3f z; z << s._pos.x, s._pos.y, s._rot;
+    Eigen::Vector3f y = z - H * x_hat;
+    
+    S = H * P_hat * H.transpose() + R;
+    K = P_hat * H.transpose() * S.inverse();
+    // /* UPDARTE */
+    x = x_hat + K * y;
 
-/*
-        1. Initialization 
-            init location and control inputs (linear a and ang a)
-        2. Predicted State Estimate - State Space model 
-            x_i = x_i-1 + u_i-1 + noise 
-        3. Predicted Covariance of the State Estimate 
-            P_(k|k-1) = F_k * P_(k-1|k-1) * F^T_k + Q_k
-                . P_(k-1|k-1) : square mat with same number of row as the state 
-                . F_k and F^T_k : Jacobian Mat <- state space modeling 
-                . Q_k : noise covariance matrix
-                    [ Cov(x,x)   Cov(x,y)   Cov(x,yaw)
-                      Cov(y,x)   Cov(y,y)   Cov(y,yaw)
-                      Cov(yaw,x) Cov(yaw,y) Cov(yaw,yaw) ]
-        4. Calculate dif between actual sensor observations and predicted sensor observations <- observation model 
-            y_i = z_i - h(x_(k|k-1)
-                . z_i is actual reading from the sensors 
-                . h( x_(k|k-1) ) = H_k * x_(k|k-1) + w_k
-                    . H_k is estimation matrix 
-                    . x_(k|k-1) is predicted state from step 2
-                    . w_k is sensor noise assumption
-        5. Innovation or residual covariance 
-            S_(k|k-1) = H_k * P_(k-1|k-1) * H^T_k + R_k
-        6. Near Optimal Kalman Gain 
-            K_k = P_(k|k-1) * H^T_k * S^(-1)_k
-                . P_(k|k-1): from  step 3
-                . H^T_k: measurement matrix
-                . S^(-1)_k: from step 5
-            -> indicate how much stat and covariance should be corrected
+    // std::cout << P - P_hat << std::endl;
+    
+    P = (Eigen::Matrix3f::Identity() - (K * H)) * P_hat;
+}
 
-        7. Update state estimate 
-            x_(k|k) = x_(k|k-1) + K_k*y_k
-        8. Update Covar of the State Estimate 
-            P_(k|k) = (I - K_k * H_k) * P_(k|k-1)
-    */
+#ifdef TEST_EKF
+
+int main(int argc, char *argv[]) {
+    state true_state = {{0,0}, 0};
+    EKF * e = new EKF(true_state);
+    
+    control con = {1,1,0};
+
+    std::random_device rd; 
+    std::mt19937 gen(rd()); 
+    std::normal_distribution<float> dist(0.0, 0.5); 
+    std::normal_distribution<float> dist2(0.0, 0.5); 
+
+    int iteration = 1;
+    while(1) {
+        std::cout << "Iteration " << iteration << std::endl;
+        true_state.increment();
+
+        control noisy_control = {dist(gen), dist(gen), 0};
+        state noisy_measure = true_state.add({{dist(gen), dist(gen)}, 0});
+
+        state predicted = e->predict(noisy_control);
+        e->update(noisy_measure);
+        state est = e->dumpPose();
+        std::cout << "True: " << true_state << std::endl;
+        std::cout << "Nois: " << noisy_measure << std::endl;
+        std::cout << "Pred: " << predicted << std::endl;
+        std::cout << "Est : " << est << std::endl;
+        std::cout << "_______" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        iteration++;
+        
+    }
+}
+
+#endif

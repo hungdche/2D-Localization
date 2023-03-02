@@ -2,49 +2,44 @@
 
 #include <Eigen/Dense>
 #include <random>
+#include <chrono>
+#include <thread>
 
 #include "core/physics.hpp"
-#include "sensors/sensors.h"
+#include "sensors/sensors.hpp"
 
-class Algorithm {
-protected:
-    Eigen::Vector3f x;
-    Algorithm(position pos, angle a) : x(pos.x, pos.y, a) { };
+class EKF{
+private:
+    /* state */
+    Eigen::Vector3f x;                  // state vector
+    Eigen::Vector2f u;                  // control vector
+
+    /* noises */
+    Eigen::Matrix3f Q;                  // covariance matrix of motion disturbance
+    Eigen::Matrix3f R;                  // covariance matrix of sensor noise 
+
+    /* prediction */
+    Eigen::Matrix3f F;                  // state transition matrix <- identity 
+    // Eigen::Matrix<float,3,2> B;         // control input matrix
+    Eigen::Matrix3f P;                  // Predicted Covariance Estimate
+    
+    Eigen::Vector3f x_hat;              // predicted state
+    Eigen::Matrix3f P_hat;             
+
+    /* measurement */
+    Eigen::Matrix3f H;                  // measurement matrix usually the Jacobian 
+    Eigen::Matrix3f S;
+    Eigen::Matrix3f K;                  // Kalman Gain
 
 public:
-    virtual void feedPose(control data) = 0;
+    EKF(state s);
+    ~EKF();
+
+    state predict(control data);
+    void update(state s);
+    
     state dumpPose() { 
         position pos = {x[0], x[1]};
         return {pos, x[2]}; 
     };
-    virtual ~Algorithm() {};
-};
-
-class EKF : public Algorithm {
-private:
-    /* PREDICTION */
-
-    // x' = F.x + Bu + v
-    Eigen::Matrix3f F; // state transition matrix <- identity 
-    Eigen::Matrix<float,3,2> B; // control input matrix
-
-    // P' = FPF^T + Q
-    Eigen::Matrix3f P; // Predicted Covariance Estimate
-    Eigen::Matrix3f Q; // covariance matrix of motion disturbance
-
-    /* UPDATE */
-
-    // y = z - h(x')
-    // h = H.x' + w
-    // S = HP'H^T + R
-    Eigen::Matrix3f H; // measurement matrix usually the Jacobian 
-    Eigen::Matrix3f R; // covariance matrix of sensor noise 
-
-    // K = P'(H^T)S^(-1)
-    float K; // Kalman Gain
-public:
-    EKF(position pos, angle a, velocity lin, velocity ang);
-    ~EKF();
-
-    void feedPose(control data);
 };

@@ -16,7 +16,7 @@ inline float angleBtw(position start, position end) {
 }
 
 inline position rayEndpoint(position a, angle theta, float distance) {
-    theta = theta * M_PI / 180.0;
+    // theta = theta * M_PI / 180.0;
     float x_offset = distance * std::sin(theta);
     float y_offset = -distance * std::cos(theta);
     position endpt = {a.x + x_offset, a.y + y_offset};
@@ -25,16 +25,28 @@ inline position rayEndpoint(position a, angle theta, float distance) {
 
 inline int isInDir (position start, position end, angle theta) {
     float dist = distance(start, end);
-    float temp_angle = angleBtw(start, end) * (180 / M_PI);
+    // float temp_angle = angleBtw(start, end) * (180 / M_PI);
+    float temp_angle = angleBtw(start, end);
 
     if ((temp_angle > 0 && theta > 0) || (temp_angle <= 0 && theta <= 0)) return 1;
     return -1;
 }
 
 inline float getX (angle a) {
-    return std::sin(a * M_PI / 180.0);
+    return std::sin(a);
 }
 
 inline float getY (angle a) {
-    return -std::cos(a * M_PI / 180.0);
+    return -std::cos(a);
+}
+
+inline float toDeg (angle a) {
+    return a * 180.0 / M_PI;
+}
+
+inline float radAdd (angle _rot, float b) {
+    _rot =  std::fmod((_rot + b) + M_PI, 2 * M_PI);
+    if (_rot < 0) _rot += 2 * M_PI;
+    _rot -= M_PI;
+    return _rot;
 }

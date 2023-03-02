@@ -17,6 +17,10 @@ struct position {
     bool operator==(const position & other) { 
         return (x == other.x && y == other.y);
     };
+    int direction(const position & other) {
+        if (x == other.x) return 0;
+        if (x == other.y) return 1;
+    }
 };
 
 enum is_accelerate {non, positive, negative, deccelerate};
