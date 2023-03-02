@@ -45,8 +45,5 @@ int main(int argc, char** argv) {
         if (std::floor(frame_period - t_elapsed) >= 0)
             SDL_Delay(std::floor(frame_period - t_elapsed));
     }
-#endif
-
-    // deallocate
-    
+#endif    
 }
