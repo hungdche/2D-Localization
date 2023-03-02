@@ -10,12 +10,13 @@ struct Ray {
     angle _rot;
     float _noise;
     bool _is_segment;
+    float _distance;
 
-    Ray(position o, angle r, bool i) : _origin(o),  _rot(r), _is_segment(i) { }
+    Ray(position o, angle r, bool i, float d = 200) : _origin(o),  _rot(r), _is_segment(i), _distance(d){ }
     ~Ray();
 
     position getDir() {
-        return rayEndpoint(_origin, _rot, 240);
+        return rayEndpoint(_origin, _rot, _distance);
     }
 
     // reference: The coding train, Coding Challenge #145: 2D Raycasting
