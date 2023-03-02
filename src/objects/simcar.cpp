@@ -1,31 +1,22 @@
 #include "objects/simcar.h"
 
-SimCar::SimCar(position init_pos, angle r, dimension dim, SDL_Texture * texture) 
-    : _pos{init_pos}, _rot{r}, _dim{dim}, _texture{texture}, lastTime(SDL_GetTicks()) { }
+SimCar::SimCar(state s, velocity vel, velocity w, dimension dim, SDL_Texture * texture) 
+    : estimated{s}, _vel{vel}, _w{w}, _dim{dim}, _texture{texture} { 
+        Parser parser("../configs/config.yaml");
+        alg = std::make_unique<EKF>(s, parser.Q, parser.R);
+    }
 
 SimCar::~SimCar() {
     SDL_DestroyTexture(_texture);
 }
 
-void SimCar::feedIMU(control s) {
-    std::random_device rd; 
-    std::mt19937 gen(rd()); 
-    std::normal_distribution<float> dist(0.0, 0.17); 
+void SimCar::feedIMU(control c, state s) {
+    predicted = alg->predict(c);
+    measured = s;
+    alg->update(s);
 
-    float dt = (s.timestamp - lastTime) / 1000.0f;
-    
-    _pos.x += s._vel * getX(_rot) * dt + dist(gen);
-    _pos.y += s._vel * getY(_rot) * dt + dist(gen);
-    _rot += s._yaw * dt + dist(gen);
-
-    lastTime = s.timestamp;
+    estimated = alg->dumpPose();
 }
 
-void SimCar::feedCamera(std::vector<position> data) {
-    
-}
 
-void SimCar::feedRaydar(std::vector<PtdCld> data) {
-
-}
 

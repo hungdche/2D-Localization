@@ -1,11 +1,14 @@
 #include <objects/vehicle.h>
 
 Vehicle::Vehicle(position p, dimension d, SDL_Texture * texture) 
-    : _pos{p} , _vel{0}, _rot{0}, _dim{d}, _texture{texture}, _accel{0}, _deg_offset(0) { 
-
+    : _pos{p} , _vel{0}, _rot{0}, _dim{d}, _texture{texture}, _push{0}, _w(0), _accel{0}, last_vel(0){ 
+    
+    Parser parser("../configs/config.yaml");
+    max_speed = parser.max_speed;
     lastFrameTs = SDL_GetTicks(); // in ms
-    _camera = std::unique_ptr<Camera>(new Camera(getCenter(), _rot, 20));
-    _raydar = std::unique_ptr<RayDar>(new RayDar(getCenter()));
+    _imu = std::unique_ptr<IMU>(new IMU(p, parser.noise_a, parser.bias_a, parser.noise_g, parser.bias_g));
+    _camera = std::unique_ptr<Camera>(new Camera(getCenter(), _rot, 0.35));
+    _raydar = std::unique_ptr<RayDar>(new RayDar(getCenter(), 200));
 }
 
 Vehicle::~Vehicle() { 
@@ -17,16 +20,16 @@ void Vehicle::handleEvent (SDL_Event & e) {
         switch( e.key.keysym.sym ) {
             case SDLK_UP: is_accel = positive; break;
             case SDLK_DOWN: is_accel = negative; break;
-            case SDLK_LEFT: _deg_offset -= 100; break;
-            case SDLK_RIGHT: _deg_offset += 100; break;
+            case SDLK_LEFT: _w -= 1.75; break;
+            case SDLK_RIGHT: _w += 1.75; break;
             case SDLK_SPACE: is_accel = deccelerate; break;
         }
     } else if( e.type == SDL_KEYUP && e.key.repeat == 0 ){
         switch( e.key.keysym.sym ) {
             case SDLK_UP: is_accel = non; break;
             case SDLK_DOWN: is_accel = non; break;
-            case SDLK_LEFT: _deg_offset += 100; break;
-            case SDLK_RIGHT: _deg_offset -= 100; break;
+            case SDLK_LEFT: _w += 1.75; break;
+            case SDLK_RIGHT: _w -= 1.75; break;
             case SDLK_SPACE: is_accel = non; break;
         }
     }
@@ -37,14 +40,14 @@ void Vehicle::move (Uint32 current_time) {
     if (is_accel) {
         switch (is_accel) {
             case positive: 
-                if (_vel > 0) _accel = 75;
-                else _accel = 125;
-                _vel += _accel * dt;
+                if (_vel > 0) _push = 75;
+                else _push = 125;
+                _vel += _push * dt;
                 break;
             case negative:
-                if (_vel > 0) _accel = -125;
-                else _accel = -75;
-                _vel += _accel * dt;
+                if (_vel > 0) _push = -125;
+                else _push = -75;
+                _vel += _push * dt;
                 break;
             case deccelerate:
                 if (_vel > 0)
@@ -67,14 +70,11 @@ void Vehicle::move (Uint32 current_time) {
     } else {
         _vel = -_vel/10;
     }
+    _rot = radAdd(_rot, _w * dt);
+    _accel = (_vel - last_vel)/dt;
 
-    // move in y direction
-    // _pos.y += vely * dt;
-        
-
-    _rot =  std::fmod((_rot + _deg_offset * dt) + 180, 360);
-    if (_rot < 0) _rot += 360;
-    _rot -= 180;
-    _camera->updateState(getCenter(), _deg_offset* dt);
+    _imu->updateState(_accel, _w, dt);
     _raydar->updateState(getCenter());
+    _camera->updateState(getCenter(), _w* dt);
+    last_vel = _vel;
 }
