@@ -32,7 +32,7 @@ private:
     Eigen::Matrix3f K;                  // Kalman Gain
 
 public:
-    EKF(state s);
+    EKF(state s, Eigen::Matrix3f q, Eigen::Matrix3f r);
     ~EKF();
 
     state predict(control data);

@@ -1,12 +1,12 @@
 #include "core/algorithm.h"
 
-EKF::EKF(state s) {
+EKF::EKF(state s, Eigen::Matrix3f q, Eigen::Matrix3f r) {
     x << s._pos.x, s._pos.y, s._rot;
     F = Eigen::Matrix3f::Identity();
     P = Eigen::Matrix3f::Identity();
     H = Eigen::Matrix3f::Identity();
-    Q = Eigen::Matrix3f::Identity() ;
-    R = Eigen::Matrix3f::Identity() ;
+    Q = q;
+    R = r;
     u << 0 , 0;
 }
 
