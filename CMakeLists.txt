@@ -14,8 +14,6 @@ else()
     find_package(SDL2_ttf REQUIRED)
 endif(EMSCRIPTEN)
 
-option (TEST_EKF OFF)
-
 find_package(SDL2 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
@@ -55,39 +53,28 @@ set(SOURCES
     src/core/engine.cpp
 )
 
-if(TEST_EKF)
-    add_definitions(-DTEST_EKF)
-    add_executable(ekf src/core/algorithm.cpp)
+add_executable(${PROJECT_NAME} src/sim.cpp ${HEADERS} ${SOURCES} )
 
-    target_link_libraries( ekf PUBLIC
-        Eigen3::Eigen
-        ${SDL2_LIBRARIES}
+target_link_libraries( ${PROJECT_NAME} PUBLIC
+    ${SDL2_LIBRARIES}
+    ${YAML_CPP_LIBRARIES}
+)
+
+if(EMSCRIPTEN)
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS 
+        "-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap'] --bind" 
+        "-s ABORTING_MALLOC=0"
+        "-s WASM_BIGINT=1" 
+        "-s USE_SDL=2 -s USE_SDL_TTF=2" 
+        # "--embed-file SFUIText-Regular.ttf"
+        "-s ALLOW_MEMORY_GROWTH"
     )
 else()
-    add_executable(${PROJECT_NAME} sim.cpp ${HEADERS} ${SOURCES} )
-
     target_link_libraries( ${PROJECT_NAME} PUBLIC
-        ${SDL2_LIBRARIES}
-        ${YAML_CPP_LIBRARIES}
+        Eigen3::Eigen
+        SDL2_ttf::SDL2_ttf
     )
-
-    if(EMSCRIPTEN)
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS 
-            "-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap'] --bind" 
-            "-s ABORTING_MALLOC=0"
-            "-s WASM_BIGINT=1" 
-            "-s USE_SDL=2 -s USE_SDL_TTF=2" 
-            # "--embed-file SFUIText-Regular.ttf"
-            "-s ALLOW_MEMORY_GROWTH"
-        )
-    else()
-        target_link_libraries( ${PROJECT_NAME} PUBLIC
-            Eigen3::Eigen
-            SDL2_ttf::SDL2_ttf
-        )
-    endif(EMSCRIPTEN)
-
-endif()
+endif(EMSCRIPTEN)
 
 
 
