@@ -1,8 +1,9 @@
 #pragma once
 #include <iostream>
 
-#include "core/common.hpp"
-#include "core/physics.hpp"
+#include "common.hpp"
+#include "physics.hpp"
+#include "types.hpp"
 
 class Object {
 public:

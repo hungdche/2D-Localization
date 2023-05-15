@@ -1,4 +1,4 @@
-#include "objects/simcar.h"
+#include "simcar.h"
 
 SimCar::SimCar(state s, velocity vel, velocity w, dimension dim, SDL_Texture * texture) 
     : estimated{s}, _vel{vel}, _w{w}, _dim{dim}, _texture{texture} { 

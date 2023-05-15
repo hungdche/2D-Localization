@@ -1,4 +1,4 @@
-#include <objects/obstacle.h>
+#include "obstacle.h"
 
 Obstacle::Obstacle(position p, dimension d, SDL_Texture * texture) 
     : _pos(p), _dim(d), _texture(texture) { }

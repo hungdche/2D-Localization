@@ -5,8 +5,8 @@
 #include <chrono>
 #include <thread>
 
-#include "core/physics.hpp"
-#include "sensors/sensors.hpp"
+#include "physics.hpp"
+#include "sensors.hpp"
 
 class EKF{
 private:

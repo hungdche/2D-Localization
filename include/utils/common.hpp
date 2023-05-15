@@ -10,27 +10,7 @@
     #include <emscripten.h>
 #endif
 
-// state
-struct position { 
-    float x; 
-    float y;
-    bool operator==(const position & other) { 
-        return (x == other.x && y == other.y);
-    };
-    int direction(const position & other) {
-        if (x == other.x) return 0;
-        if (x == other.y) return 1;
-    }
-};
-
-enum is_accelerate {non, positive, negative, deccelerate};
-typedef float velocity;
-typedef float acceleration;
-typedef float angle;
-
-// geometry
-struct dimension { int w; int h; };
-struct line { position s; position e;};
+#include "types.hpp"
 
 // global variable 
 extern dimension ScreenDim;

@@ -4,8 +4,9 @@
 #include <cmath>
 #include <memory>
 
-#include "core/engine.h"
-#include "core/common.hpp"
+#include "engine.h"
+#include "common.hpp"
+#include "types.hpp"
 
 #define SCREEN_FPS 60.0
 

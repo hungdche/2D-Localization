@@ -6,12 +6,12 @@
 #include <cmath>
 #include <vector>
 
-#include "objects/object.h"
-#include "objects/obstacle.h"
-#include "objects/vehicle.h"
-#include "objects/simcar.h"
-#include "core/common.hpp"
-#include "core/physics.hpp"
+#include "object.h"
+#include "obstacle.h"
+#include "vehicle.h"
+#include "simcar.h"
+#include "common.hpp"
+#include "physics.hpp"
 
 class Engine {
 private:

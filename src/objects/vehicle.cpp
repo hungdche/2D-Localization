@@ -1,4 +1,4 @@
-#include <objects/vehicle.h>
+#include "vehicle.h"
 
 Vehicle::Vehicle(position p, dimension d, SDL_Texture * texture) 
     : _pos{p} , _vel{0}, _rot{0}, _dim{d}, _texture{texture}, _push{0}, _w(0), _accel{0}, last_vel(0){ 

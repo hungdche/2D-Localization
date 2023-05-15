@@ -1,4 +1,4 @@
-#include "core/algorithm.h"
+#include "algorithm.h"
 
 EKF::EKF(state s, Eigen::Matrix3f q, Eigen::Matrix3f r) {
     x << s._pos.x, s._pos.y, s._rot;

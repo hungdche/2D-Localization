@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "objects/object.h"
+#include "object.h"
 
 class Obstacle : public Object {
 private:

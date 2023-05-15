@@ -19,46 +19,37 @@ find_package(yaml-cpp REQUIRED)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}
-    ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/font
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/include/localization
+    ${PROJECT_SOURCE_DIR}/include/main_engine
+    ${PROJECT_SOURCE_DIR}/include/objects
+    ${PROJECT_SOURCE_DIR}/include/sensors
+    ${PROJECT_SOURCE_DIR}/include/utils
     ${PROJECT_SOURCE_DIR}/external/eigen
+    ${PROJECT_SOURCE_DIR}/external/imgui
     ${SDL2_INCLUDE_DIRS}
     ${YAML_INCLUDE_DIRS}
 )
 
-set(HEADERS
-    include/core/common.hpp
-    include/core/physics.hpp
-    include/core/parser.hpp
-    include/core/algorithm.h
-    include/sensors/noise.hpp
-    include/sensors/ray.hpp
-    include/sensors/sensors.hpp
-    include/objects/object.h
-    include/objects/vehicle.h
-    include/objects/simcar.h
-    include/objects/obstacle.h
-    include/core/engine.h
-    external/eigen/Eigen/Dense
-)
-
 set(SOURCES
-    src/core/algorithm.cpp
-    src/objects/vehicle.cpp
-    src/objects/simcar.cpp
     src/objects/obstacle.cpp
-    src/sensors/imu.hpp
-    src/sensors/raydar.hpp
-    src/core/engine.cpp
+    src/objects/simcar.cpp
+    src/objects/vehicle.cpp
+    src/sensors/imu.cpp
+    src/sensors/raydar.cpp
+    src/localization/algorithm.cpp
+    src/main_engine/engine.cpp
 )
 
-add_executable(${PROJECT_NAME} src/sim.cpp ${HEADERS} ${SOURCES} )
-
-target_link_libraries( ${PROJECT_NAME} PUBLIC
+set(LIBS
     ${SDL2_LIBRARIES}
     ${YAML_CPP_LIBRARIES}
 )
+
+add_executable(${PROJECT_NAME} src/sim.cpp ${SOURCES} )
+
+target_link_libraries( ${PROJECT_NAME} PUBLIC ${LIBS})
 
 if(EMSCRIPTEN)
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS 

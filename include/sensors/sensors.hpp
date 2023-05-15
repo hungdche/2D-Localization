@@ -1,52 +1,11 @@
 #pragma once 
 
-#include "sensors/ray.hpp"
 #include <iomanip> 
 #include <random>
 #include <math.h> 
 
-#pragma region data_struct
-struct control {
-    velocity _vel;
-    angle _yaw;
-    float dt;
-};
-
-struct state {
-    position _pos;
-    angle _rot;
-    
-    void increment() {
-        _pos.x++;
-        _pos.y++;
-    }
-
-    state add(const state& s) {
-        return {{_pos.x + s._pos.x, _pos.y + s._pos.y}, _rot + s._rot};
-    }
-
-    friend std::ostream & operator <<( std::ostream& out, const state& B) {
-        return out << std::setprecision (4) << std::fixed << "Position: " << B._pos.x << " " << B._pos.y << " Rotation: " << B._rot;
-    }
-};
-
-struct PtdCld {
-    float distance;
-    angle degree;
-    Uint32 timestamp;
-};
-
-struct Noise {
-    Noise(){};
-    float getNoise (float var) {
-        std::random_device rd; 
-        std::mt19937 gen(rd()); 
-        std::normal_distribution<float> dist(0.0, var);
-        float n = dist(gen);
-        return n; 
-    }
-};
-#pragma endregion
+#include "ray.hpp"
+#include "types.hpp"
 
 struct Camera {
     std::vector<Ray *> rays;

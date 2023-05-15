@@ -1,9 +1,9 @@
 #pragma once 
 #include <vector>
 
-#include "sensors/sensors.hpp"
-#include "objects/object.h"
-#include "core/parser.hpp"
+#include "sensors.hpp"
+#include "object.h"
+#include "parser.hpp"
 
 
 class Vehicle : public Object {

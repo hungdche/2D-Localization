@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "core/physics.hpp"
-#include "core/common.hpp"
+#include "physics.hpp"
+#include "common.hpp"
 
 struct Ray {
     position _origin;

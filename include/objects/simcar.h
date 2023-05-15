@@ -1,8 +1,8 @@
 #pragma once 
 
-#include "objects/vehicle.h"
-#include "core/algorithm.h"
-#include "core/parser.hpp"
+#include "vehicle.h"
+#include "algorithm.h"
+#include "parser.hpp"
 #include <random>
 
 class SimCar : public Object{

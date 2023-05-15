@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <cmath>
 
-#include "core/common.hpp"
+#include "common.hpp"
 
 inline float distance(position a, position b) {
     return std::sqrt(std::pow((a.x - b.x), 2) + std::pow((a.y - b.y), 2));
